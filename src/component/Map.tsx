@@ -4,6 +4,7 @@ import { EditControl } from 'react-leaflet-draw';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import L from 'leaflet';
+import 'leaflet-geometryutil';
 
 // Define LayersControl for base layers
 const { BaseLayer } = LayersControl;
@@ -11,7 +12,29 @@ const { BaseLayer } = LayersControl;
 const Map = () => {
   const _onCreated = (e: any) => {
     const { layerType, layer } = e;
-    console.log(`Created layer of type: ${layerType}`, layer);
+    const latlngs = layer.getLatLngs();
+    
+    if (layerType === 'polyline') {
+      // Calculate distance for polylines
+      const totalDistance = L.GeometryUtil.length(layer);
+      console.log(`Created Polyline with total distance: ${totalDistance.toFixed(2)} meters`);
+      layer.bindPopup(`Total distance: ${totalDistance.toFixed(2)} meters`).openPopup();
+    } else if (layerType === 'polygon') {
+      // Calculate area for polygons
+      const area = L.GeometryUtil.geodesicArea(latlngs[0]);
+      console.log(`Created Polygon with area: ${area.toFixed(2)} square meters`);
+      layer.bindPopup(`Area: ${area.toFixed(2)} square meters`).openPopup();
+    } else if (layerType === 'circle') {
+      // Display the radius for circles
+      const radius = layer.getRadius();
+      console.log(`Created Circle with radius: ${radius.toFixed(2)} meters`);
+      layer.bindPopup(`Radius: ${radius.toFixed(2)} meters`).openPopup();
+    } else if (layerType === 'marker') {
+      // Show the coordinates for marker
+      const { lat, lng } = layer.getLatLng();
+      console.log(`Created Marker at coordinates: [${lat}, ${lng}]`);
+      layer.bindPopup(`Coordinates: [${lat.toFixed(6)}, ${lng.toFixed(6)}]`).openPopup();
+    }
   };
 
   const _onEdited = (e: any) => {
@@ -31,7 +54,7 @@ const Map = () => {
   };
 
   return (
-    <MapContainer center={[18.7964, 98.9540]} zoom={15} style={{ height: '100vh', width: '100%' }}>
+    <MapContainer center={[18.7964, 98.9540]} zoom={15} minZoom={2} maxZoom={18} style={{ height: '100vh', width: '100%' }}>
       <LayersControl position="topright">
         <BaseLayer name="Street View">
           <TileLayer
@@ -60,7 +83,7 @@ const Map = () => {
             polygon: true,
             circle: true,
             marker: true,
-            circlemarker: false,
+            circlemarker: true,
           }}
         />
       </FeatureGroup>

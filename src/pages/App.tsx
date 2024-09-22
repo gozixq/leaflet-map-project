@@ -9,10 +9,7 @@ function App() {
   
   return (
     <div className='flex'>
-      <div className="flex flex-col border border-l border-[#1E1E1E69]">
-        <Profile />
-        <Sidebar />
-      </div>
+     
       <Map />
     </div>
     
